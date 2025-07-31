@@ -1,10 +1,10 @@
-# eventcron
+# Eventcron
 
 A modern golang implementation of the inotify cron system (incron).
 
 ## Overview
 
-eventcron is a complete rewrite of the original incron C++ project in Go. It provides a daemon (`eventcrond`) that monitors filesystem events using Linux inotify and executes commands when specified events occur, plus a table management utility (`eventcrontab`) similar to crontab.
+Eventcron is a complete rewrite of the original incron C++ project in Go. It provides a daemon (`eventcrond`) that monitors filesystem events using Linux inotify and executes commands when specified events occur, plus a table management utility (`eventcrontab`) similar to crontab.
 
 Unlike traditional cron which runs commands based on time, incron runs commands based on filesystem events like file creation, modification, or deletion.
 

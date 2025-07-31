@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	defaultEditor = "vi"
+	defaultEditor = "vim"
 	tempFilePrefix = "eventcrontab"
 )
 

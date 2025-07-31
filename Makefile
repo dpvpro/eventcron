@@ -13,7 +13,6 @@ CGO_ENABLED ?= 0
 # Installation paths
 PREFIX ?= /usr/local
 BINDIR = $(PREFIX)/bin
-SBINDIR = $(PREFIX)/sbin
 SYSCONFDIR = /etc
 MANDIR = $(PREFIX)/share/man
 DOCDIR = $(PREFIX)/share/doc/$(PROJECT_NAME)
@@ -126,7 +125,6 @@ install: build install-dirs install-bins install-config
 install-dirs:
 	@echo "Creating installation directories..."
 	install -d $(DESTDIR)$(BINDIR)
-	install -d $(DESTDIR)$(SBINDIR)
 	install -d $(DESTDIR)$(SYSCONFDIR)
 	install -d $(DESTDIR)$(DOCDIR)
 	install -d $(DESTDIR)$(USERTABLEDIR)
@@ -135,8 +133,8 @@ install-dirs:
 .PHONY: install-bins
 install-bins:
 	@echo "Installing binaries..."
-	install -m 0755 $(DAEMON) $(DESTDIR)$(SBINDIR)/
-	install -m 4755 $(CLIENT) $(DESTDIR)$(BINDIR)/
+	install -m 0755 $(DAEMON) $(DESTDIR)$(BINDIR)/
+	install -m 0755 $(CLIENT) $(DESTDIR)$(BINDIR)/
 
 .PHONY: install-config
 install-config:
@@ -155,7 +153,7 @@ install-man:
 .PHONY: uninstall
 uninstall:
 	@echo "Uninstalling $(PROJECT_NAME)..."
-	rm -f $(DESTDIR)$(SBINDIR)/$(DAEMON)
+	rm -f $(DESTDIR)$(BINDIR)/$(DAEMON)
 	rm -f $(DESTDIR)$(BINDIR)/$(CLIENT)
 	rm -rf $(DESTDIR)$(DOCDIR)
 
@@ -199,7 +197,7 @@ install-systemd:
 	@echo "" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
 	@echo "[Service]" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
 	@echo "Type=forking" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
-	@echo "ExecStart=$(SBINDIR)/$(DAEMON)" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "ExecStart=$(BINDIR)/$(DAEMON)" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
 	@echo "ExecReload=/bin/kill -HUP \$$MAINPID" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
 	@echo "PIDFile=/run/eventcrond.pid" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
 	@echo "Restart=on-failure" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
