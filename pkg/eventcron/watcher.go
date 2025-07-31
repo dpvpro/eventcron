@@ -1,5 +1,5 @@
 // Package incron provides inotify watcher functionality
-package eventcrone
+package eventcron
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-module github.com/dpvpro/eventcrone
+module github.com/dpvpro/eventcron
 
 go 1.21
 

@@ -1,4 +1,4 @@
-// Package main implements the eventcrone table manipulator (eventcronetab) in Go
+// Package main implements the eventcron table manipulator (eventcrontab) in Go
 package main
 
 import (
@@ -12,12 +12,12 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/dpvpro/eventcrone/pkg/eventcrone"
+	"github.com/dpvpro/eventcron/pkg/eventcron"
 )
 
 const (
 	defaultEditor = "vi"
-	tempFilePrefix = "eventcronetab"
+	tempFilePrefix = "eventcrontab"
 )
 
 // Operation represents the type of operation to perform
@@ -34,10 +34,10 @@ const (
 
 func main() {
 	var (
-		listFlag    = flag.Bool("l", false, "List current eventcrone table")
-		editFlag    = flag.Bool("e", false, "Edit current eventcrone table")
-		removeFlag  = flag.Bool("r", false, "Remove current eventcrone table")
-		replaceFlag = flag.Bool("", false, "Replace eventcrone table with file from stdin")
+		listFlag    = flag.Bool("l", false, "List current eventcron table")
+		editFlag    = flag.Bool("e", false, "Edit current eventcron table")
+		removeFlag  = flag.Bool("r", false, "Remove current eventcron table")
+		replaceFlag = flag.Bool("", false, "Replace eventcron table with file from stdin")
 		userFlag    = flag.String("u", "", "Specify user (root only)")
 		versionFlag = flag.Bool("V", false, "Show version and exit")
 		helpFlag    = flag.Bool("h", false, "Show help and exit")
@@ -50,7 +50,7 @@ func main() {
 	}
 
 	if *versionFlag {
-		fmt.Printf("eventcronetab %s\n", eventcrone.Version)
+		fmt.Printf("eventcrontab %s\n", eventcron.Version)
 		os.Exit(0)
 	}
 
@@ -93,9 +93,9 @@ func main() {
 func showHelp() {
 	fmt.Printf("Usage: %s [options] [file]\n", os.Args[0])
 	fmt.Println("\nOptions:")
-	fmt.Println("  -l        List current eventcrone table")
-	fmt.Println("  -e        Edit current eventcrone table")
-	fmt.Println("  -r        Remove current eventcrone table")
+	fmt.Println("  -l        List current eventcron table")
+	fmt.Println("  -e        Edit current eventcron table")
+	fmt.Println("  -r        Remove current eventcron table")
 	fmt.Println("  -u user   Specify user (root only)")
 	fmt.Println("  -V        Show version and exit")
 	fmt.Println("  -h        Show help and exit")
@@ -109,7 +109,7 @@ func showHelp() {
 	fmt.Println("Example:")
 	fmt.Println("  /tmp IN_CREATE,IN_MODIFY echo File changed: $@/$#")
 	fmt.Println()
-	fmt.Printf("eventcronetab %s\n", eventcrone.Version)
+	fmt.Printf("eventcrontab %s\n", eventcron.Version)
 }
 
 // getTargetUser determines which user's table to operate on
@@ -138,16 +138,16 @@ func getTargetUser(userFlag string) (string, error) {
 	return userFlag, nil
 }
 
-// checkPermissions checks if the user has permission to use eventcrone
+// checkPermissions checks if the user has permission to use eventcron
 func checkPermissions(username string) error {
-	// Check if user has permission to use eventcrone
-	allowed, err := eventcrone.CheckUserPermission(username)
+	// Check if user has permission to use eventcron
+	allowed, err := eventcron.CheckUserPermission(username)
 	if err != nil {
 		return fmt.Errorf("failed to check user permissions: %v", err)
 	}
 
 	if !allowed {
-		return fmt.Errorf("user %s is not allowed to use eventcrone", username)
+		return fmt.Errorf("user %s is not allowed to use eventcron", username)
 	}
 
 	return nil
@@ -169,14 +169,14 @@ func executeOperation(op Operation, username string) error {
 	}
 }
 
-// listTable lists the current eventcrone table for the user
+// listTable lists the current eventcron table for the user
 func listTable(username string) error {
-	if !eventcrone.UserTableExists(username) {
+	if !eventcron.UserTableExists(username) {
 		// No table exists, just exit silently
 		return nil
 	}
 
-	table, err := eventcrone.LoadUserTable(username)
+	table, err := eventcron.LoadUserTable(username)
 	if err != nil {
 		return fmt.Errorf("failed to load table: %v", err)
 	}
@@ -189,7 +189,7 @@ func listTable(username string) error {
 	return nil
 }
 
-// editTable opens the user's eventcrone table in an editor
+// editTable opens the user's eventcron table in an editor
 func editTable(username string) error {
 	// Get editor
 	editor := os.Getenv("EDITOR")
@@ -209,14 +209,14 @@ func editTable(username string) error {
 	defer os.Remove(tempPath)
 
 	// Load existing table if it exists
-	var table *eventcrone.IncronTable
-	if eventcrone.UserTableExists(username) {
-		table, err = eventcrone.LoadUserTable(username)
+	var table *eventcron.IncronTable
+	if eventcron.UserTableExists(username) {
+		table, err = eventcron.LoadUserTable(username)
 		if err != nil {
 			return fmt.Errorf("failed to load existing table: %v", err)
 		}
 	} else {
-		table = &eventcrone.IncronTable{Username: username}
+		table = &eventcron.IncronTable{Username: username}
 	}
 
 	// Write current table to temp file
@@ -229,7 +229,7 @@ func editTable(username string) error {
 
 	// Add helpful comments for new users
 	if table.IsEmpty() {
-		helpText := `# Edit this file to configure eventcrone table for user ` + username + `
+		helpText := `# Edit this file to configure eventcron table for user ` + username + `
 # Format: <path> <mask> <command>
 # 
 # Example:
@@ -290,7 +290,7 @@ func editTable(username string) error {
 	}
 
 	// Parse the edited file
-	newTable, err := eventcrone.LoadTable(tempPath)
+	newTable, err := eventcron.LoadTable(tempPath)
 	if err != nil {
 		return fmt.Errorf("failed to parse edited table: %v", err)
 	}
@@ -299,7 +299,7 @@ func editTable(username string) error {
 	newTable.Username = username
 
 	// Validate the new table
-	if errors := eventcrone.ValidateTable(newTable); len(errors) > 0 {
+	if errors := eventcron.ValidateTable(newTable); len(errors) > 0 {
 		fmt.Fprintf(os.Stderr, "Validation errors found:\n")
 		for _, err := range errors {
 			fmt.Fprintf(os.Stderr, "  %v\n", err)
@@ -336,8 +336,8 @@ func editTable(username string) error {
 	}
 
 	// Save the new table
-	tablePath := eventcrone.GetUserTablePath(username)
-	if err := eventcrone.SaveTable(newTable, tablePath); err != nil {
+	tablePath := eventcron.GetUserTablePath(username)
+	if err := eventcron.SaveTable(newTable, tablePath); err != nil {
 		return fmt.Errorf("failed to save table: %v", err)
 	}
 
@@ -346,7 +346,7 @@ func editTable(username string) error {
 		return fmt.Errorf("failed to set table permissions: %v", err)
 	}
 
-	// Send SIGHUP to eventcroned to reload tables
+	// Send SIGHUP to eventcrond to reload tables
 	if err := reloadDaemon(); err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: failed to reload daemon: %v\n", err)
 	}
@@ -376,7 +376,7 @@ func editTableWithContent(username, tempPath string) error {
 	}
 
 	// Parse the edited file again
-	newTable, err := eventcrone.LoadTable(tempPath)
+	newTable, err := eventcron.LoadTable(tempPath)
 	if err != nil {
 		return fmt.Errorf("failed to parse edited table: %v", err)
 	}
@@ -384,7 +384,7 @@ func editTableWithContent(username, tempPath string) error {
 	newTable.Username = username
 
 	// Validate again
-	if errors := eventcrone.ValidateTable(newTable); len(errors) > 0 {
+	if errors := eventcron.ValidateTable(newTable); len(errors) > 0 {
 		fmt.Fprintf(os.Stderr, "Validation errors still present:\n")
 		for _, err := range errors {
 			fmt.Fprintf(os.Stderr, "  %v\n", err)
@@ -393,8 +393,8 @@ func editTableWithContent(username, tempPath string) error {
 	}
 
 	// Save the table
-	tablePath := eventcrone.GetUserTablePath(username)
-	if err := eventcrone.SaveTable(newTable, tablePath); err != nil {
+	tablePath := eventcron.GetUserTablePath(username)
+	if err := eventcron.SaveTable(newTable, tablePath); err != nil {
 		return fmt.Errorf("failed to save table: %v", err)
 	}
 
@@ -410,18 +410,18 @@ func editTableWithContent(username, tempPath string) error {
 	return nil
 }
 
-// removeTable removes the user's eventcrone table
+// removeTable removes the user's eventcron table
 func removeTable(username string) error {
-	if !eventcrone.UserTableExists(username) {
+	if !eventcron.UserTableExists(username) {
 		fmt.Printf("No table for user %s\n", username)
 		return nil
 	}
 
-	if err := eventcrone.RemoveUserTable(username); err != nil {
+	if err := eventcron.RemoveUserTable(username); err != nil {
 		return fmt.Errorf("failed to remove table: %v", err)
 	}
 
-	// Send SIGHUP to eventcroned to reload tables
+	// Send SIGHUP to eventcrond to reload tables
 	if err := reloadDaemon(); err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: failed to reload daemon: %v\n", err)
 	}
@@ -430,7 +430,7 @@ func removeTable(username string) error {
 	return nil
 }
 
-// replaceTable replaces the user's eventcrone table with content from stdin or file
+// replaceTable replaces the user's eventcron table with content from stdin or file
 func replaceTable(username string) error {
 	var input *os.File
 	var err error
@@ -472,7 +472,7 @@ func replaceTable(username string) error {
 	}
 
 	// Parse the input
-	table, err := eventcrone.LoadTable(tempPath)
+	table, err := eventcron.LoadTable(tempPath)
 	if err != nil {
 		return fmt.Errorf("failed to parse input: %v", err)
 	}
@@ -480,7 +480,7 @@ func replaceTable(username string) error {
 	table.Username = username
 
 	// Validate the table
-	if errors := eventcrone.ValidateTable(table); len(errors) > 0 {
+	if errors := eventcron.ValidateTable(table); len(errors) > 0 {
 		fmt.Fprintf(os.Stderr, "Validation errors found:\n")
 		for _, err := range errors {
 			fmt.Fprintf(os.Stderr, "  %v\n", err)
@@ -489,8 +489,8 @@ func replaceTable(username string) error {
 	}
 
 	// Save the table
-	tablePath := eventcrone.GetUserTablePath(username)
-	if err := eventcrone.SaveTable(table, tablePath); err != nil {
+	tablePath := eventcron.GetUserTablePath(username)
+	if err := eventcron.SaveTable(table, tablePath); err != nil {
 		return fmt.Errorf("failed to save table: %v", err)
 	}
 
@@ -498,7 +498,7 @@ func replaceTable(username string) error {
 		return fmt.Errorf("failed to set table permissions: %v", err)
 	}
 
-	// Send SIGHUP to eventcroned to reload tables
+	// Send SIGHUP to eventcrond to reload tables
 	if err := reloadDaemon(); err != nil {
 		fmt.Fprintf(os.Stderr, "Warning: failed to reload daemon: %v\n", err)
 	}
@@ -507,14 +507,14 @@ func replaceTable(username string) error {
 	return nil
 }
 
-// reloadDaemon sends SIGHUP to eventcroned to reload tables
+// reloadDaemon sends SIGHUP to eventcrond to reload tables
 func reloadDaemon() error {
 	// Read PID from file
-	pidFile := "/run/eventcroned.pid"
+	pidFile := "/run/eventcrond.pid"
 	pidBytes, err := os.ReadFile(pidFile)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("eventcroned does not appear to be running")
+			return fmt.Errorf("eventcrond does not appear to be running")
 		}
 		return fmt.Errorf("failed to read PID file: %v", err)
 	}

@@ -1,6 +1,6 @@
-# eventcrone Usage Examples
+# eventcron Usage Examples
 
-This document provides practical examples of using eventcrone for various monitoring scenarios.
+This document provides practical examples of using eventcron for various monitoring scenarios.
 
 ## Basic Examples
 
@@ -9,8 +9,8 @@ This document provides practical examples of using eventcrone for various monito
 Monitor when new files are created in `/tmp` and log them:
 
 ```bash
-# Add to incron table
-incrontab -e
+# Add to eventcron table
+eventcrontab -e
 
 # Add this line:
 /tmp IN_CREATE logger "New file created: $@/$#"
@@ -52,7 +52,7 @@ Monitor configuration files and restart services safely:
 # Monitor nginx config
 /etc/nginx/nginx.conf IN_MODIFY,loopable=false nginx -t && systemctl reload nginx
 
-# Monitor application config  
+# Monitor application config
 /etc/myapp/config.yml IN_MODIFY,loopable=false systemctl restart myapp
 ```
 
@@ -242,7 +242,7 @@ IN_CREATE,recursive=true,dotdirs=false,loopable=false
 ## Best Practices
 
 ### 1. Use Absolute Paths
-Always use absolute paths in incron tables:
+Always use absolute paths in eventcron tables:
 ```bash
 # Good
 /home/user/documents IN_CREATE process.sh "$@/$#"
@@ -263,14 +263,14 @@ When your command might modify the watched files:
 /data IN_MODIFY,loopable=false process-data.sh "$@/$#"
 ```
 
-### 4. Test Commands Before Adding to incron
+### 4. Test Commands Before Adding to eventcron
 Test your commands manually first:
 ```bash
 # Test the command
 echo "test" > /tmp/testfile
 process.sh "/tmp/testfile"
 
-# Then add to incron
+# Then add to eventcron
 /tmp IN_CREATE process.sh "$@/$#"
 ```
 
@@ -304,14 +304,14 @@ For high-frequency events, consider batching:
 /test/dir IN_CREATE logger "Executing: command $@/$#" && command "$@/$#"
 ```
 
-### Check incron Status
+### Check eventcron status
 ```bash
 # List current table
-incrontab -l
+eventcrontab -l
 
 # Check daemon status
-systemctl status incrond
+systemctl status eventcrond
 
 # Check logs
-journalctl -u incrond -f
+journalctl -u eventcrond -f
 ```

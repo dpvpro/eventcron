@@ -1,5 +1,5 @@
 // Package incron provides user permission checking functionality
-package eventcrone
+package eventcron
 
 import (
 	"bufio"

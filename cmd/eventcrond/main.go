@@ -1,4 +1,4 @@
-// Package main implements the eventcrone daemon (eventcroned) in Go
+// Package main implements the eventcron daemon (eventcrond) in Go
 package main
 
 import (
@@ -12,12 +12,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/dpvpro/eventcrone/pkg/eventcrone"
+	"github.com/dpvpro/eventcron/pkg/eventcron"
 )
 
 const (
-	defaultConfigFile    = "/etc/eventcrone.conf"
-	defaultPidFile       = "/run/eventcroned.pid"
+	defaultConfigFile    = "/etc/eventcron.conf"
+	defaultPidFile       = "/run/eventcrond.pid"
 	defaultMaxConcurrent = 32
 	defaultTimeout       = 300 // 5 minutes
 )
@@ -33,13 +33,13 @@ type Config struct {
 	SystemTableDir       string
 }
 
-// Daemon represents the eventcrone daemon
+// Daemon represents the eventcron daemon
 type Daemon struct {
 	config       *Config
-	watcher      *eventcrone.Watcher
-	executor     *eventcrone.CommandExecutor
-	userTables   map[string]*eventcrone.IncronTable
-	systemTables map[string]*eventcrone.IncronTable
+	watcher      *eventcron.Watcher
+	executor     *eventcron.CommandExecutor
+	userTables   map[string]*eventcron.IncronTable
+	systemTables map[string]*eventcron.IncronTable
 	logger       *log.Logger
 	mu           sync.RWMutex
 	shutdown     chan struct{}
@@ -60,17 +60,17 @@ func main() {
 		fmt.Printf("Usage: %s [options]\n", os.Args[0])
 		fmt.Println("\nOptions:")
 		flag.PrintDefaults()
-		fmt.Println("\neventcrone daemon (eventcroned) version", eventcrone.Version)
+		fmt.Println("\neventcron daemon (eventcrond) version", eventcron.Version)
 		os.Exit(0)
 	}
 
 	if *version {
-		fmt.Printf("eventcroned %s\n", eventcrone.Version)
+		fmt.Printf("eventcrond %s\n", eventcron.Version)
 		os.Exit(0)
 	}
 
 	// Check root privileges
-	if err := eventcrone.CheckRootPrivileges(); err != nil {
+	if err := eventcron.CheckRootPrivileges(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
@@ -87,7 +87,7 @@ func main() {
 	}
 
 	// Setup directories and permissions
-	if err := eventcrone.SetupPermissions(); err != nil {
+	if err := eventcron.SetupPermissions(); err != nil {
 		logger.Printf("Failed to setup permissions: %v", err)
 		os.Exit(1)
 	}
@@ -95,8 +95,8 @@ func main() {
 	// Create daemon
 	daemon := &Daemon{
 		config:       config,
-		userTables:   make(map[string]*eventcrone.IncronTable),
-		systemTables: make(map[string]*eventcrone.IncronTable),
+		userTables:   make(map[string]*eventcron.IncronTable),
+		systemTables: make(map[string]*eventcron.IncronTable),
 		logger:       logger,
 		shutdown:     make(chan struct{}),
 		done:         make(chan struct{}),
@@ -127,13 +127,13 @@ func main() {
 	go daemon.handleSignals()
 
 	// Start daemon
-	logger.Printf("eventcroned %s starting up", eventcrone.Version)
+	logger.Printf("eventcrond %s starting up", eventcron.Version)
 	if err := daemon.Run(); err != nil {
 		logger.Printf("Daemon error: %v", err)
 		os.Exit(1)
 	}
 
-	logger.Printf("eventcroned %s shutting down", eventcrone.Version)
+	logger.Printf("eventcrond %s shutting down", eventcron.Version)
 }
 
 // loadConfig loads configuration from file or returns defaults
@@ -143,8 +143,8 @@ func loadConfig(configFile string) *Config {
 		CommandTimeout:        time.Duration(defaultTimeout) * time.Second,
 		LogToSyslog:          true,
 		LogLevel:             "info",
-		UserTableDir:         eventcrone.DefaultUserTableDir,
-		SystemTableDir:       eventcrone.DefaultSystemTableDir,
+		UserTableDir:         eventcron.DefaultUserTableDir,
+		SystemTableDir:       eventcron.DefaultSystemTableDir,
 	}
 
 	// TODO: Implement actual config file parsing
@@ -155,13 +155,13 @@ func loadConfig(configFile string) *Config {
 // setupLogging sets up logging to syslog or stderr
 func setupLogging(useSyslog bool) (*log.Logger, error) {
 	if useSyslog {
-		syslogWriter, err := syslog.New(syslog.LOG_DAEMON|syslog.LOG_INFO, "eventcroned")
+		syslogWriter, err := syslog.New(syslog.LOG_DAEMON|syslog.LOG_INFO, "eventcrond")
 		if err != nil {
 			return nil, fmt.Errorf("failed to connect to syslog: %v", err)
 		}
 		return log.New(syslogWriter, "", 0), nil
 	}
-	return log.New(os.Stderr, "eventcroned: ", log.LstdFlags), nil
+	return log.New(os.Stderr, "eventcrond: ", log.LstdFlags), nil
 }
 
 // daemonize turns the process into a daemon
@@ -222,14 +222,14 @@ func removePidFile(pidFile string) {
 // Initialize initializes the daemon
 func (d *Daemon) Initialize() error {
 	// Create inotify watcher
-	watcher, err := eventcrone.NewWatcher()
+	watcher, err := eventcron.NewWatcher()
 	if err != nil {
 		return fmt.Errorf("failed to create watcher: %v", err)
 	}
 	d.watcher = watcher
 
 	// Create command executor
-	d.executor = eventcrone.NewCommandExecutor(
+	d.executor = eventcron.NewCommandExecutor(
 		d.config.MaxConcurrentCommands,
 		d.config.CommandTimeout,
 	)
@@ -253,11 +253,11 @@ func (d *Daemon) LoadTables() error {
 	defer d.mu.Unlock()
 
 	// Clear existing tables
-	d.userTables = make(map[string]*eventcrone.IncronTable)
-	d.systemTables = make(map[string]*eventcrone.IncronTable)
+	d.userTables = make(map[string]*eventcron.IncronTable)
+	d.systemTables = make(map[string]*eventcron.IncronTable)
 
 	// Load user tables
-	userTables, err := eventcrone.LoadAllUserTables()
+	userTables, err := eventcron.LoadAllUserTables()
 	if err != nil {
 		d.logger.Printf("Warning: failed to load user tables: %v", err)
 	} else {
@@ -265,7 +265,7 @@ func (d *Daemon) LoadTables() error {
 	}
 
 	// Load system tables
-	systemTables, err := eventcrone.LoadAllSystemTables()
+	systemTables, err := eventcron.LoadAllSystemTables()
 	if err != nil {
 		d.logger.Printf("Warning: failed to load system tables: %v", err)
 	} else {
@@ -323,7 +323,7 @@ func (d *Daemon) Run() error {
 }
 
 // handleEvent processes an inotify event
-func (d *Daemon) handleEvent(event *eventcrone.InotifyEvent) {
+func (d *Daemon) handleEvent(event *eventcron.InotifyEvent) {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 
@@ -332,13 +332,13 @@ func (d *Daemon) handleEvent(event *eventcrone.InotifyEvent) {
 		for _, entry := range table.Entries {
 			if d.eventMatches(&entry, event) {
 				// Check user permissions
-				allowed, err := eventcrone.CheckUserPermission(username)
+				allowed, err := eventcron.CheckUserPermission(username)
 				if err != nil {
 					d.logger.Printf("Error checking permissions for user %s: %v", username, err)
 					continue
 				}
 				if !allowed {
-					d.logger.Printf("User %s not allowed to use eventcrone", username)
+					d.logger.Printf("User %s not allowed to use eventcron", username)
 					continue
 				}
 
@@ -359,8 +359,8 @@ func (d *Daemon) handleEvent(event *eventcrone.InotifyEvent) {
 	}
 }
 
-// eventMatches checks if an event matches an eventcrone entry
-func (d *Daemon) eventMatches(entry *eventcrone.IncronEntry, event *eventcrone.InotifyEvent) bool {
+// eventMatches checks if an event matches an eventcron entry
+func (d *Daemon) eventMatches(entry *eventcron.IncronEntry, event *eventcron.InotifyEvent) bool {
 	// Check if the path matches
 	if !entry.MatchesPath(event.WatchDir) && !entry.MatchesPath(event.Path) {
 		return false
@@ -374,8 +374,8 @@ func (d *Daemon) eventMatches(entry *eventcrone.IncronEntry, event *eventcrone.I
 	return true
 }
 
-// executeCommand executes a command for an eventcrone entry
-func (d *Daemon) executeCommand(entry *eventcrone.IncronEntry, event *eventcrone.InotifyEvent, username string) {
+// executeCommand executes a command for an eventcron entry
+func (d *Daemon) executeCommand(entry *eventcron.IncronEntry, event *eventcron.InotifyEvent, username string) {
 	result, err := d.executor.Execute(entry, event, username)
 	if err != nil {
 		d.logger.Printf("Failed to execute command for user %s: %v", username, err)

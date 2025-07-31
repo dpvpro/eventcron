@@ -1,7 +1,7 @@
-# Makefile for eventcrone project
+# Makefile for eventcron project
 
 # Project configuration
-PROJECT_NAME = eventcrone
+PROJECT_NAME = eventcron
 VERSION = $(shell cat VERSION 2>/dev/null || echo "1.0.0")
 GOVERSION = $(shell go version | awk '{print $$3}')
 
@@ -17,8 +17,8 @@ SBINDIR = $(PREFIX)/sbin
 SYSCONFDIR = /etc
 MANDIR = $(PREFIX)/share/man
 DOCDIR = $(PREFIX)/share/doc/$(PROJECT_NAME)
-USERTABLEDIR = /var/spool/eventcrone
-SYSTEMTABLEDIR = /etc/eventcrone.d
+USERTABLEDIR = /var/spool/eventcron
+SYSTEMTABLEDIR = /etc/eventcron.d
 
 # Build flags
 LDFLAGS = -s -w -X main.version=$(VERSION) -X main.buildTime=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -30,8 +30,8 @@ GOFMT = gofmt
 GOLINT = golangci-lint
 
 # Targets
-DAEMON = eventcroned
-CLIENT = eventcronetab
+DAEMON = eventcrond
+CLIENT = eventcrontab
 
 # Default target
 .PHONY: all
@@ -141,9 +141,9 @@ install-bins:
 .PHONY: install-config
 install-config:
 	@echo "Installing configuration files..."
-	@if [ ! -f $(DESTDIR)$(SYSCONFDIR)/eventcrone.conf ]; then \
-		echo "# eventcrone configuration file" > $(DESTDIR)$(SYSCONFDIR)/eventcrone.conf; \
-		echo "# This file is currently unused but reserved for future configuration options" >> $(DESTDIR)$(SYSCONFDIR)/eventcrone.conf; \
+	@if [ ! -f $(DESTDIR)$(SYSCONFDIR)/eventcron.conf ]; then \
+		echo "# eventcron configuration file" > $(DESTDIR)$(SYSCONFDIR)/eventcron.conf; \
+		echo "# This file is currently unused but reserved for future configuration options" >> $(DESTDIR)$(SYSCONFDIR)/eventcron.conf; \
 	fi
 
 # Man pages (placeholder - to be implemented)
@@ -193,19 +193,19 @@ docker-run:
 .PHONY: install-systemd
 install-systemd:
 	@echo "Installing systemd service..."
-	@echo "[Unit]" > $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "Description=Inotify cron daemon" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "After=network.target" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "[Service]" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "Type=forking" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "ExecStart=$(SBINDIR)/$(DAEMON)" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "ExecReload=/bin/kill -HUP \$$MAINPID" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "PIDFile=/run/eventcroned.pid" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "Restart=on-failure" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "[Install]" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "WantedBy=multi-user.target" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
+	@echo "[Unit]" > $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "Description=Inotify cron daemon" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "After=network.target" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "[Service]" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "Type=forking" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "ExecStart=$(SBINDIR)/$(DAEMON)" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "ExecReload=/bin/kill -HUP \$$MAINPID" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "PIDFile=/run/eventcrond.pid" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "Restart=on-failure" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "[Install]" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "WantedBy=multi-user.target" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
 
 # Cleanup
 .PHONY: clean

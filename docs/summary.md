@@ -1,4 +1,4 @@
-# eventcrone Project Summary
+# eventcron Project Summary
 
 ## Overview
 
@@ -14,7 +14,7 @@ This is a complete rewrite of the incron C++ project in Go, providing a modern, 
 
 ### 2. Core Components Implemented
 
-#### Daemon (`eventcroned`)
+#### Daemon (`eventcrond`)
 - **Event-driven architecture** using inotify for filesystem monitoring
 - **Concurrent command execution** with configurable limits
 - **Signal handling** (SIGHUP for reload, SIGTERM for graceful shutdown)
@@ -22,7 +22,7 @@ This is a complete rewrite of the incron C++ project in Go, providing a modern, 
 - **Recursive directory watching** with configurable options
 - **Loop prevention** to avoid infinite event cycles
 
-#### Client (`eventcronetab`)
+#### Client (`eventcrontab`)
 - **Table management** compatible with original crontab-style interface
 - **Interactive editing** with validation and error reporting
 - **User permission checking** via allow/deny files
@@ -51,9 +51,9 @@ This is a complete rewrite of the incron C++ project in Go, providing a modern, 
 - **Process cleanup** and signal handling
 
 #### Configuration
-- **System tables** in `/etc/eventcrone.d/` for root-level automation
-- **User tables** in `/var/spool/eventcrone/` for per-user configuration
-- **Permission files** `/etc/eventcrone.allow` and `/etc/eventcrone.deny`
+- **System tables** in `/etc/eventcron.d/` for root-level automation
+- **User tables** in `/var/spool/eventcron/` for per-user configuration
+- **Permission files** `/etc/eventcron.allow` and `/etc/eventcron.deny`
 - **Table validation** with detailed error messages
 
 ### 4. Build and Deployment
@@ -100,11 +100,11 @@ This is a complete rewrite of the incron C++ project in Go, providing a modern, 
 ## File Structure
 
 ```
-eventcrone/
+eventcron/
 ├── cmd/
-│   ├── eventcroned/          # Daemon executable
-│   └── eventcronetab/        # Client executable
-├── pkg/eventcrone/           # Core library
+│   ├── eventcrond/          # Daemon executable
+│   └── eventcrontab/        # Client executable
+├── pkg/eventcron/           # Core library
 │   ├── types.go          # Core types and parsing
 │   ├── table.go          # Table management
 │   ├── permissions.go    # User permission handling
@@ -125,10 +125,10 @@ eventcrone/
 ### Basic File Monitoring
 ```bash
 # Monitor /tmp for new files
-echo '/tmp IN_CREATE logger "New file: $#"' | eventcronetab
+echo '/tmp IN_CREATE logger "New file: $#"' | eventcrontab
 
 # Monitor configuration changes
-echo '/etc/nginx/nginx.conf IN_MODIFY systemctl reload nginx' | eventcronetab
+echo '/etc/nginx/nginx.conf IN_MODIFY systemctl reload nginx' | eventcrontab
 ```
 
 ### Advanced Scenarios
@@ -150,7 +150,7 @@ echo '/etc/nginx/nginx.conf IN_MODIFY systemctl reload nginx' | eventcronetab
 - **Wildcards**: All `$@`, `$#`, `$%`, `$&`, `$$` expansions work identically
 - **Event masks**: All inotify events supported with same names
 - **Options**: `recursive`, `loopable`, `dotdirs` work as expected
-- **Permissions**: `eventcrone.allow` and `eventcrone.deny` files work identically
+- **Permissions**: `eventcron.allow` and `eventcron.deny` files work identically
 - **Signals**: SIGHUP reload and SIGTERM shutdown work the same
 
 ### Enhanced Features
@@ -178,7 +178,7 @@ echo '/etc/nginx/nginx.conf IN_MODIFY systemctl reload nginx' | eventcronetab
 
 ### Process Security
 - **Privilege separation**: Commands run with user credentials
-- **SUID handling**: Proper SUID bit management for eventcronetab
+- **SUID handling**: Proper SUID bit management for eventcrontab
 - **Permission validation**: Comprehensive user permission checking
 - **Resource limits**: Configurable limits prevent resource exhaustion
 
@@ -212,10 +212,10 @@ make build
 sudo make install
 
 # Start daemon
-sudo systemctl start eventcroned
+sudo systemctl start eventcrond
 
 # Add a watch
-echo '/tmp IN_CREATE echo "File created: $#"' | eventcronetab
+echo '/tmp IN_CREATE echo "File created: $#"' | eventcrontab
 
 # Test it
 touch /tmp/testfile
@@ -238,6 +238,6 @@ make build-all
 
 ## Conclusion
 
-The eventcrone project successfully provides a modern, efficient, and fully compatible replacement for the original C++ incron implementation. With improved performance, better error handling, easier deployment, and comprehensive testing, it represents a significant advancement while maintaining complete backward compatibility.
+The eventcron project successfully provides a modern, efficient, and fully compatible replacement for the original C++ incron implementation. With improved performance, better error handling, easier deployment, and comprehensive testing, it represents a significant advancement while maintaining complete backward compatibility.
 
 The Go implementation is ready for production use and provides a solid foundation for future enhancements and community contributions.

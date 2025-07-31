@@ -1,5 +1,5 @@
-// Package incron provides core types and functionality for the Go implementation of eventcrone
-package eventcrone
+// Package incron provides core types and functionality for the Go implementation of eventcron
+package eventcron
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 // Version information
 const (
 	Version = "1.0.0"
-	Name    = "eventcrone"
+	Name    = "eventcron"
 )
 
 // Default paths and configuration

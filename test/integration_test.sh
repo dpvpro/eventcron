@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Integration test script for eventcrone
+# Integration test script for eventcron
 # This script tests basic functionality of the Go incron implementation
 
 # set -e
@@ -12,10 +12,10 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Test configuration
-TEST_DIR="/tmp/eventcrone-test-$$"
+TEST_DIR="/tmp/eventcron-test-$$"
 TEST_USER="$(whoami)"
 DAEMON_PID=""
-TEST_LOG="/tmp/eventcrone-test.log"
+TEST_LOG="/tmp/eventcron-test.log"
 
 # Cleanup function
 cleanup() {
@@ -298,7 +298,7 @@ EOF
 # Main test execution
 main() {
     echo "========================================"
-    echo "  eventcrone Integration Test Suite"
+    echo "  eventcron Integration Test Suite"
     echo "========================================"
     echo
     

@@ -1,4 +1,4 @@
-package eventcrone
+package eventcron
 
 import (
 	"strings"

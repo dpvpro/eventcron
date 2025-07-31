@@ -1,4 +1,4 @@
-# eventcrone configuration file example
+# eventcron configuration file example
 # This file is located at /etc/incron.conf
 
 # Maximum number of concurrent commands that can run simultaneously
@@ -94,7 +94,7 @@
 # These will be available in addition to the standard incron variables
 #environment = {
 #    "INCRON_VERSION" = "1.0.0",
-#    "INCRON_DAEMON" = "eventcrone"
+#    "INCRON_DAEMON" = "eventcron"
 #}
 
 # Commands that are always allowed to run, even if user permissions deny it

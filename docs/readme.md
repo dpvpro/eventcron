@@ -1,10 +1,10 @@
-# Eventcrone
+# eventcron
 
 A modern golang implementation of the inotify cron system (incron).
 
 ## Overview
 
-Eventcrone is a complete rewrite of the original incron C++ project in Go. It provides a daemon (`eventcroned`) that monitors filesystem events using Linux inotify and executes commands when specified events occur, plus a table management utility (`eventcronetab`) similar to crontab.
+eventcron is a complete rewrite of the original incron C++ project in Go. It provides a daemon (`eventcrond`) that monitors filesystem events using Linux inotify and executes commands when specified events occur, plus a table management utility (`eventcrontab`) similar to crontab.
 
 Unlike traditional cron which runs commands based on time, incron runs commands based on filesystem events like file creation, modification, or deletion.
 
@@ -15,7 +15,7 @@ Unlike traditional cron which runs commands based on time, incron runs commands 
 - **Recursive directory watching** - Monitor entire directory trees
 - **Flexible event filtering** - Support for all inotify event types
 - **User permissions** - Support for allow/deny files like original incron
-- **System tables** - Support for system-wide incron tables in `/etc/eventcrone.d/`
+- **System tables** - Support for system-wide incron tables in `/etc/eventcron.d/`
 - **Signal handling** - Graceful shutdown and table reloading with SIGHUP
 - **Concurrent execution** - Efficient handling of multiple simultaneous events
 - **Loop prevention** - Optional protection against infinite event loops
@@ -26,8 +26,8 @@ Unlike traditional cron which runs commands based on time, incron runs commands 
 
 ```bash
 # Clone the repository
-git clone https://github.com/dpvpro/eventcrone.git
-cd eventcrone
+git clone https://github.com/dpvpro/eventcron.git
+cd eventcron
 
 # Build the project
 make build
@@ -48,34 +48,34 @@ sudo make install
 
 ```bash
 # Start daemon in foreground (for testing)
-sudo eventcroned -n
+sudo eventcrond -n
 
 # Start daemon in background
-sudo eventcroned
+sudo eventcrond
 
 # Check status
-systemctl status eventcroned  # if using systemd
+systemctl status eventcrond  # if using systemd
 ```
 
 ### Managing User Tables
 
-The `eventcronetab` command manages incron tables for users:
+The `eventcrontab` command manages incron tables for users:
 
 ```bash
 # List current user's table
-eventcronetab -l
+eventcrontab -l
 
 # Edit current user's table
-eventcronetab -e
+eventcrontab -e
 
 # Remove current user's table
-eventcronetab -r
+eventcrontab -r
 
 # Install table from file
-eventcronetab /path/to/table/file
+eventcrontab /path/to/table/file
 
 # Edit another user's table (root only)
-sudo eventcronetab -u username -e
+sudo eventcrontab -u username -e
 ```
 
 ### Table Format
@@ -139,26 +139,26 @@ Commands can use these wildcards:
 
 ### Daemon Configuration
 
-The daemon looks for configuration in `/etc/eventcrone.conf` (currently placeholder).
+The daemon looks for configuration in `/etc/eventcron.conf` (currently placeholder).
 
 ### User Permissions
 
 User access is controlled by:
 
-- `/etc/eventcrone.allow` - If exists, only listed users can use incron
-- `/etc/eventcrone.deny` - If exists, listed users cannot use incron
-- If neither exists, all users can use eventcrone
+- `/etc/eventcron.allow` - If exists, only listed users can use incron
+- `/etc/eventcron.deny` - If exists, listed users cannot use incron
+- If neither exists, all users can use eventcron
 
 ### System Tables
 
-System-wide tables can be placed in `/etc/eventcrone.d/`. These run with root privileges and are managed directly (not via eventcronetab).
+System-wide tables can be placed in `/etc/eventcron.d/`. These run with root privileges and are managed directly (not via eventcrontab).
 
 ## Directories
 
-- `/var/spool/eventcrone/` - User eventcrone tables
-- `/etc/eventcrone.d/` - System eventcrone tables
-- `/etc/eventcrone.conf` - Configuration file
-- `/run/eventcroned.pid` - Daemon PID file
+- `/var/spool/eventcron/` - User eventcron tables
+- `/etc/eventcron.d/` - System eventcron tables
+- `/etc/eventcron.conf` - Configuration file
+- `/run/eventcrond.pid` - Daemon PID file
 
 ## Systemd Integration
 
@@ -166,11 +166,11 @@ A systemd service file is included:
 
 ```bash
 # Enable and start the service
-sudo systemctl enable eventcroned
-sudo systemctl start eventcroned
+sudo systemctl enable eventcrond
+sudo systemctl start eventcrond
 
 # Reload tables without restart
-sudo systemctl reload eventcroned
+sudo systemctl reload eventcrond
 ```
 
 ## Development
@@ -233,7 +233,7 @@ GOOS=linux GOARCH=arm64 make build
 ### Common Issues
 
 1. **Permission denied**
-   - Ensure eventcronetab has setuid bit: `chmod u+s /usr/local/bin/eventcronetab`
+   - Ensure eventcrontab has setuid bit: `chmod u+s /usr/local/bin/eventcrontab`
    - Check user permissions in allow/deny files
 
 2. **Daemon won't start**
@@ -255,14 +255,14 @@ GOOS=linux GOARCH=arm64 make build
 
 ```bash
 # Run daemon in foreground with verbose logging
-sudo eventcroned -n
+sudo eventcrond -n
 
 # Check what events are being generated
-eventcronetab -e
+eventcrontab -e
 # Add: /path/to/test IN_ALL_EVENTS logger "Event: $% File: $#"
 
 # Monitor system logs
-journalctl -u eventcroned -f
+journalctl -u eventcrond -f
 ```
 
 ## Contributing
