@@ -1,0 +1,68 @@
+# Example user incron table
+# Format: <path> <mask> <command>
+#
+# This file demonstrates various incron table configurations
+# Copy and modify as needed for your use case
+
+# Basic file monitoring - log when files are created in /tmp
+/tmp IN_CREATE logger "File created in /tmp: $#"
+
+# Monitor file modifications in home directory documents
+/home/user/Documents IN_MODIFY,IN_CLOSE_WRITE backup-script "$@/$#"
+
+# Watch for file deletions and send email notification
+/important/files IN_DELETE mail -s "File deleted: $#" admin@example.com < /dev/null
+
+# Monitor uploads directory and process new files
+/var/www/uploads IN_MOVED_TO process-upload.sh "$@/$#"
+
+# Recursive monitoring of log directory (exclude hidden files)
+/var/log IN_CREATE,recursive=true,dotdirs=false /usr/local/bin/log-rotator "$@/$#"
+
+# Watch configuration directory with loop prevention
+/etc/myapp IN_MODIFY,loopable=false systemctl reload myapp
+
+# Monitor multiple events on a specific file
+/etc/passwd IN_MODIFY,IN_ATTRIB logger "Password file changed: $%"
+
+# Watch for directory creation and set permissions
+/shared/projects IN_CREATE,IN_ISDIR chmod 755 "$@/$#"
+
+# Simple file synchronization
+/data/source IN_CLOSE_WRITE rsync -av "$@/$#" /data/backup/
+
+# Process images when they are added to a directory
+/photos IN_MOVED_TO,IN_CREATE convert "$@/$#" -resize 800x600 "/thumbnails/$#"
+
+# Monitor database directory for new files
+/var/lib/database IN_CREATE,IN_CLOSE_WRITE /usr/local/bin/db-import "$@/$#"
+
+# Watch for file attribute changes (permissions, ownership)
+/secure/files IN_ATTRIB logger "File attributes changed: $@ file: $# event: $%"
+
+# Monitor temporary directory and clean up old files
+/tmp IN_CREATE /usr/local/bin/cleanup-temp.sh "$@/$#"
+
+# Watch for file moves and update indexes
+/documents IN_MOVED_TO,IN_MOVED_FROM /usr/local/bin/update-index.sh "$@" "$#" "$%"
+
+# Complex example with multiple options
+/media/incoming IN_CREATE,IN_MOVED_TO,recursive=true,dotdirs=false,loopable=false \
+    /usr/local/bin/media-processor.sh --file="$@/$#" --event="$%" --flags="$&"
+
+# Monitor configuration file and restart service
+/etc/nginx/nginx.conf IN_MODIFY,loopable=false nginx -t && systemctl reload nginx
+
+# Watch for new log files and set up log rotation
+/var/log/apps IN_CREATE /usr/local/bin/setup-logrotate.sh "$@/$#"
+
+# Monitor source code directory for changes (development)
+/home/user/projects IN_MODIFY,recursive=true,dotdirs=false \
+    /usr/local/bin/auto-build.sh "$@" "$#"
+
+# Watch downloads directory and organize files by type
+/home/user/Downloads IN_MOVED_TO /usr/local/bin/organize-downloads.sh "$@/$#"
+
+# Monitor system directory for security purposes  
+/etc IN_MODIFY,IN_CREATE,IN_DELETE,recursive=false \
+    logger -p security.warning "System file modified: $@/$# ($%)"

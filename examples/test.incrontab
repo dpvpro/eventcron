@@ -1,0 +1,1 @@
+/tmp IN_CREATE echo "File created: $#" >> /tmp/incron.log

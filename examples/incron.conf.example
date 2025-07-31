@@ -1,0 +1,118 @@
+# eventcrone configuration file example
+# This file is located at /etc/incron.conf
+
+# Maximum number of concurrent commands that can run simultaneously
+# Default: 32
+#max_concurrent_commands = 32
+
+# Command execution timeout in seconds
+# Commands that run longer than this will be killed
+# Default: 300 (5 minutes)
+#command_timeout = 300
+
+# Whether to log to syslog (true) or stderr (false)
+# Default: true
+#log_to_syslog = true
+
+# Log level: debug, info, warn, error
+# Default: info
+#log_level = info
+
+# PID file location
+# Default: /var/run/incrond.pid
+#pid_file = /var/run/incrond.pid
+
+# User table directory
+# Default: /var/spool/incron
+#user_table_dir = /var/spool/incron
+
+# System table directory
+# Default: /etc/incron.d
+#system_table_dir = /etc/incron.d
+
+# Allow file location
+# If this file exists, only users listed in it can use incron
+# Default: /etc/incron.allow
+#allow_file = /etc/incron.allow
+
+# Deny file location
+# If this file exists, users listed in it cannot use incron
+# Default: /etc/incron.deny
+#deny_file = /etc/incron.deny
+
+# Maximum inotify watches per user
+# This is a system limit that may need to be increased for heavy usage
+# Check current limit: cat /proc/sys/fs/inotify/max_user_watches
+# Increase limit: echo 524288 > /proc/sys/fs/inotify/max_user_watches
+# Make permanent: add "fs.inotify.max_user_watches=524288" to /etc/sysctl.conf
+#max_user_watches = 8192
+
+# Maximum inotify instances per user
+# Check current limit: cat /proc/sys/fs/inotify/max_user_instances
+#max_user_instances = 128
+
+# Default recursion depth for recursive watches
+# -1 means unlimited, 0 means no recursion
+# Default: -1 (unlimited)
+#default_recursion_depth = -1
+
+# Whether to follow symbolic links when setting up recursive watches
+# Default: false
+#follow_symlinks = false
+
+# Buffer size for inotify events (in bytes)
+# Larger buffers can handle burst of events better
+# Default: 16384 (16KB)
+#event_buffer_size = 16384
+
+# Whether to automatically reload tables when they are modified
+# Default: true
+#auto_reload_tables = true
+
+# Minimum interval between table reloads (in seconds)
+# Prevents excessive reloading when tables are modified frequently
+# Default: 1
+#reload_interval = 1
+
+# Whether to create user table directory if it doesn't exist
+# Default: true
+#create_user_dir = true
+
+# Whether to create system table directory if it doesn't exist
+# Default: true
+#create_system_dir = true
+
+# Default file permissions for user tables (octal)
+# Default: 0600 (read/write for owner only)
+#user_table_permissions = 0600
+
+# Default file permissions for system tables (octal)
+# Default: 0644 (read/write for owner, read for group and others)
+#system_table_permissions = 0644
+
+# Environment variables to pass to executed commands
+# These will be available in addition to the standard incron variables
+#environment = {
+#    "INCRON_VERSION" = "1.0.0",
+#    "INCRON_DAEMON" = "eventcrone"
+#}
+
+# Commands that are always allowed to run, even if user permissions deny it
+# Useful for system maintenance commands
+#always_allow_commands = [
+#    "/bin/echo",
+#    "/usr/bin/logger",
+#    "/bin/ls"
+#]
+
+# Commands that are never allowed to run, regardless of user permissions
+# Useful for security
+#never_allow_commands = [
+#    "/bin/rm",
+#    "/bin/rmdir",
+#    "/usr/bin/shred"
+#]
+
+# NOTE: This configuration file is currently not fully implemented.
+# Most settings above are placeholders for future functionality.
+# The current implementation uses hardcoded defaults.
