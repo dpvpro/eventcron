@@ -158,7 +158,7 @@ System-wide tables can be placed in `/etc/eventcrone.d/`. These run with root pr
 - `/var/spool/eventcrone/` - User eventcrone tables
 - `/etc/eventcrone.d/` - System eventcrone tables
 - `/etc/eventcrone.conf` - Configuration file
-- `/var/run/eventcroned.pid` - Daemon PID file
+- `/run/eventcroned.pid` - Daemon PID file
 
 ## Systemd Integration
 

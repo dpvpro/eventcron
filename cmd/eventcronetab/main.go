@@ -510,7 +510,7 @@ func replaceTable(username string) error {
 // reloadDaemon sends SIGHUP to eventcroned to reload tables
 func reloadDaemon() error {
 	// Read PID from file
-	pidFile := "/var/run/eventcroned.pid"
+	pidFile := "/run/eventcroned.pid"
 	pidBytes, err := os.ReadFile(pidFile)
 	if err != nil {
 		if os.IsNotExist(err) {

@@ -201,7 +201,7 @@ install-systemd:
 	@echo "Type=forking" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
 	@echo "ExecStart=$(SBINDIR)/$(DAEMON)" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
 	@echo "ExecReload=/bin/kill -HUP \$$MAINPID" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
-	@echo "PIDFile=/var/run/eventcroned.pid" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
+	@echo "PIDFile=/run/eventcroned.pid" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
 	@echo "Restart=on-failure" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
 	@echo "" >> $(DESTDIR)/etc/systemd/system/eventcroned.service
 	@echo "[Install]" >> $(DESTDIR)/etc/systemd/system/eventcroned.service

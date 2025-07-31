@@ -17,7 +17,7 @@ import (
 
 const (
 	defaultConfigFile    = "/etc/eventcrone.conf"
-	defaultPidFile       = "/var/run/eventcroned.pid"
+	defaultPidFile       = "/run/eventcroned.pid"
 	defaultMaxConcurrent = 32
 	defaultTimeout       = 300 // 5 minutes
 )
