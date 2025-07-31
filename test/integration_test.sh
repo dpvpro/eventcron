@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Integration test script for eventcron
-# This script tests basic functionality of the Go incron implementation
+# This script tests basic functionality of the Go eventcron implementation
 
 # set -e
 
@@ -31,7 +31,7 @@ cleanup() {
     rm -rf "$TEST_DIR" "$TEST_LOG" 2>/dev/null || true
     
     # Remove test table
-    ./incrontab -r 2>/dev/null || true
+    ./eventcrontab -r 2>/dev/null || true
     
     echo -e "${GREEN}Cleanup complete${NC}"
 }
@@ -67,13 +67,13 @@ check_privileges() {
 test_binaries() {
     log "Testing binaries..."
     
-    if [ ! -x "./incrond" ]; then
-        error "incrond binary not found or not executable"
+    if [ ! -x "./eventcrond" ]; then
+        error "eventcrond binary not found or not executable"
         return 1
     fi
     
-    if [ ! -x "./incrontab" ]; then
-        error "incrontab binary not found or not executable"
+    if [ ! -x "./eventcrontab" ]; then
+        error "eventcrontab binary not found or not executable"
         return 1
     fi
     
@@ -84,15 +84,15 @@ test_binaries() {
 test_version() {
     log "Testing version output..."
     
-    local daemon_version=$(./incrond -V 2>&1)
-    local client_version=$(./incrontab -V 2>&1)
+    local daemon_version=$(./eventcrond -V 2>&1)
+    local client_version=$(./eventcrontab -V 2>&1)
     
-    if [[ ! "$daemon_version" =~ "incrond 1.0.0" ]]; then
+    if [[ ! "$daemon_version" =~ "eventcrond 1.0.0" ]]; then
         error "Unexpected daemon version: $daemon_version"
         return 1
     fi
     
-    if [[ ! "$client_version" =~ "incrontab 1.0.0" ]]; then
+    if [[ ! "$client_version" =~ "eventcrontab 1.0.0" ]]; then
         error "Unexpected client version: $client_version"
         return 1
     fi
@@ -104,8 +104,8 @@ test_version() {
 test_help() {
     log "Testing help output..."
     
-    local daemon_help=$(./incrond -h 2>&1)
-    local client_help=$(./incrontab -h 2>&1)
+    local daemon_help=$(./eventcrond -h 2>&1)
+    local client_help=$(./eventcrontab -h 2>&1)
     
     if [[ ! "$daemon_help" =~ "Usage:" ]]; then
         error "Daemon help output missing"
@@ -120,30 +120,30 @@ test_help() {
     log "✓ Help output correct"
 }
 
-# Test 4: Test incrontab basic operations (non-root)
-test_incrontab_basic() {
-    log "Testing incrontab basic operations..."
+# Test 4: Test eventcrontab basic operations (non-root)
+test_eventcrontab_basic() {
+    log "Testing eventcrontab basic operations..."
     
     # Create test directory
     mkdir -p "$TEST_DIR"
     
     # Test list empty table
-    local output=$(./incrontab -l 2>&1 || true)
+    local output=$(./eventcrontab -l 2>&1 || true)
     log "Empty table list output: '$output'"
     
     # Create a test table file
     cat > /tmp/test-table << EOF
-# Test incron table
+# Test eventcron table
 $TEST_DIR IN_CREATE echo "Created: \$#" >> $TEST_LOG
 $TEST_DIR IN_MODIFY echo "Modified: \$#" >> $TEST_LOG
 EOF
     
     # Test table installation (this might fail without proper permissions)
-    if ./incrontab /tmp/test-table 2>/dev/null; then
+    if ./eventcrontab /tmp/test-table 2>/dev/null; then
         log "✓ Table installation succeeded"
         
         # Test list table
-        local list_output=$(./incrontab -l 2>&1)
+        local list_output=$(./eventcrontab -l 2>&1)
         if [[ "$list_output" =~ "$TEST_DIR" ]]; then
             log "✓ Table listing works"
         else
@@ -151,7 +151,7 @@ EOF
         fi
         
         # Test remove table
-        if ./incrontab -r 2>/dev/null; then
+        if ./eventcrontab -r 2>/dev/null; then
             log "✓ Table removal succeeded"
         else
             warning "Table removal failed"
@@ -173,7 +173,7 @@ test_daemon_startup() {
     log "Testing daemon startup..."
     
     # Start daemon in foreground mode
-    ./incrond -n -p "/tmp/incrond-test.pid" &
+    ./eventcrond -n -p "/tmp/eventcrond-test.pid" &
     DAEMON_PID=$!
     
     # Give daemon time to start
@@ -184,7 +184,7 @@ test_daemon_startup() {
         log "✓ Daemon started successfully"
         
         # Check PID file
-        if [ -f "/tmp/incrond-test.pid" ]; then
+        if [ -f "/tmp/eventcrond-test.pid" ]; then
             log "✓ PID file created"
         else
             warning "PID file not created"
@@ -233,13 +233,13 @@ test_file_monitoring() {
     rm -f "$TEST_LOG"
     
     # Create test table
-    mkdir -p /var/spool/incron
-    cat > "/var/spool/incron/$TEST_USER" << EOF
+    mkdir -p /var/spool/eventcron
+    cat > "/var/spool/eventcron/$TEST_USER" << EOF
 $TEST_DIR IN_CREATE echo "File created: \$#" >> $TEST_LOG
 EOF
     
     # Start daemon
-    ./incrond -n -p "/tmp/incrond-test.pid" &
+    ./eventcrond -n -p "/tmp/eventcrond-test.pid" &
     DAEMON_PID=$!
     
     # Give daemon time to start and load tables
@@ -269,7 +269,7 @@ EOF
     DAEMON_PID=""
     
     # Cleanup
-    rm -f "/var/spool/incron/$TEST_USER"
+    rm -f "/var/spool/eventcron/$TEST_USER"
 }
 
 # Test 7: Test table validation
@@ -286,7 +286,7 @@ relative/path IN_CREATE echo test
 EOF
     
     # Test invalid table (should fail)
-    if ./incrontab /tmp/invalid-table 2>/dev/null; then
+    if ./eventcrontab /tmp/invalid-table 2>/dev/null; then
         warning "Invalid table was accepted (validation might be weak)"
     else
         log "✓ Invalid table correctly rejected"
@@ -306,7 +306,7 @@ main() {
     cd "$(dirname "$0")/.."
     
     # Check if binaries exist
-    if [ ! -f "./incrond" ] || [ ! -f "./incrontab" ]; then
+    if [ ! -f "./eventcrond" ] || [ ! -f "./eventcrontab" ]; then
         error "Binaries not found. Please run 'make build' first."
         exit 1
     fi
@@ -319,7 +319,7 @@ main() {
         "test_binaries"
         "test_version" 
         "test_help"
-        "test_incrontab_basic"
+        "test_eventcrontab_basic"
         "test_daemon_startup"
         "test_file_monitoring"
         "test_table_validation"

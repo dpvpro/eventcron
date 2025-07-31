@@ -1,4 +1,4 @@
-// Package incron provides command execution functionality
+// Package eventcron provides command execution functionality
 package eventcron
 
 import (
@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// CommandExecutor executes commands for incron entries
+// CommandExecutor executes commands for eventcron entries
 type CommandExecutor struct {
 	runningCommands map[string]*RunningCommand // Key: command ID
 	mu              sync.RWMutex               // Mutex for thread safety
@@ -26,7 +26,7 @@ type CommandExecutor struct {
 // RunningCommand represents a currently executing command
 type RunningCommand struct {
 	ID        string          // Unique identifier
-	Entry     *IncronEntry    // Associated incron entry
+	Entry     *IncronEntry    // Associated eventcron entry
 	Event     *InotifyEvent   // Event that triggered the command
 	Cmd       *exec.Cmd       // The actual command
 	Username  string          // User to run the command as
@@ -95,9 +95,9 @@ func (ce *CommandExecutor) Execute(entry *IncronEntry, event *InotifyEvent, user
 
 	// Set environment variables
 	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, fmt.Sprintf("INCRON_PATH=%s", event.Path))
-	cmd.Env = append(cmd.Env, fmt.Sprintf("INCRON_NAME=%s", event.Name))
-	cmd.Env = append(cmd.Env, fmt.Sprintf("INCRON_EVENT=%s", maskToString(event.Mask)))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("EVENTCRON_PATH=%s", event.Path))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("EVENTCRON_NAME=%s", event.Name))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("EVENTCRON_EVENT=%s", maskToString(event.Mask)))
 
 	// Create running command info
 	runningCmd := &RunningCommand{

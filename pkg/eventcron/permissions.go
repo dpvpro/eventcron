@@ -1,4 +1,4 @@
-// Package incron provides user permission checking functionality
+// Package eventcron provides user permission checking functionality
 package eventcron
 
 import (
@@ -10,7 +10,7 @@ import (
 	"syscall"
 )
 
-// CheckUserPermission checks if a user has permission to use incron
+// CheckUserPermission checks if a user has permission to use eventcron
 // This implements the same logic as the original C++ version:
 // 1. If allow file exists, user must be listed there
 // 2. If deny file exists, user must NOT be listed there

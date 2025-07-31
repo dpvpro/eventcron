@@ -1,5 +1,5 @@
 # eventcron configuration file example
-# This file is located at /etc/incron.conf
+# This file is located at /etc/eventcron.conf
 
 # Maximum number of concurrent commands that can run simultaneously
 # Default: 32
@@ -19,26 +19,26 @@
 #log_level = info
 
 # PID file location
-# Default: /var/run/incrond.pid
-#pid_file = /var/run/incrond.pid
+# Default: /var/run/eventcrond.pid
+#pid_file = /var/run/eventcrond.pid
 
 # User table directory
-# Default: /var/spool/incron
-#user_table_dir = /var/spool/incron
+# Default: /var/spool/eventcron
+#user_table_dir = /var/spool/eventcron
 
 # System table directory
-# Default: /etc/incron.d
-#system_table_dir = /etc/incron.d
+# Default: /etc/eventcron.d
+#system_table_dir = /etc/eventcron.d
 
 # Allow file location
-# If this file exists, only users listed in it can use incron
-# Default: /etc/incron.allow
-#allow_file = /etc/incron.allow
+# If this file exists, only users listed in it can use eventcron
+# Default: /etc/eventcron.allow
+#allow_file = /etc/eventcron.allow
 
 # Deny file location
-# If this file exists, users listed in it cannot use incron
-# Default: /etc/incron.deny
-#deny_file = /etc/incron.deny
+# If this file exists, users listed in it cannot use eventcron
+# Default: /etc/eventcron.deny
+#deny_file = /etc/eventcron.deny
 
 # Maximum inotify watches per user
 # This is a system limit that may need to be increased for heavy usage
@@ -91,10 +91,10 @@
 #system_table_permissions = 0644
 
 # Environment variables to pass to executed commands
-# These will be available in addition to the standard incron variables
+# These will be available in addition to the standard eventcron variables
 #environment = {
-#    "INCRON_VERSION" = "1.0.0",
-#    "INCRON_DAEMON" = "eventcron"
+#    "EVENTCRON_VERSION" = "1.0.0",
+#    "EVENTCRON_DAEMON" = "eventcron"
 #}
 
 # Commands that are always allowed to run, even if user permissions deny it

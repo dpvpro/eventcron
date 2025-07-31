@@ -1,4 +1,4 @@
-// Package incron provides core types and functionality for the Go implementation of eventcron
+// Package eventcron provides core types and functionality for the Go implementation of eventcron
 package eventcron
 
 import (
@@ -17,11 +17,11 @@ const (
 
 // Default paths and configuration
 const (
-	DefaultConfigFile    = "/etc/incron.conf"
-	DefaultUserTableDir  = "/var/spool/incron"
-	DefaultSystemTableDir = "/etc/incron.d"
-	DefaultAllowFile     = "/etc/incron.allow"
-	DefaultDenyFile      = "/etc/incron.deny"
+	DefaultConfigFile    = "/etc/eventcron.conf"
+	DefaultUserTableDir  = "/var/spool/eventcron"
+	DefaultSystemTableDir = "/etc/eventcron.d"
+	DefaultAllowFile     = "/etc/eventcron.allow"
+	DefaultDenyFile      = "/etc/eventcron.deny"
 )
 
 // Inotify event masks - mapping from original C++ constants
@@ -106,14 +106,14 @@ var ReverseEventMaskMap = map[uint32]string{
 	InAllEvents:     "IN_ALL_EVENTS",
 }
 
-// EntryOptions holds additional options for incron entries
+// EntryOptions holds additional options for eventcron entries
 type EntryOptions struct {
 	NoLoop     bool // loopable=false - disable events during command execution
 	Recursive  bool // recursive=true/false - watch subdirectories
 	DotDirs    bool // dotdirs=true - include hidden directories and files
 }
 
-// IncronEntry represents a single entry in an incron table
+// eventcronEntry represents a single entry in an eventcron table
 type IncronEntry struct {
 	Path      string       // Watched filesystem path
 	Mask      uint32       // Event mask (combination of IN_* constants)
@@ -122,10 +122,10 @@ type IncronEntry struct {
 	LineNumber int         // Line number in the source file (for error reporting)
 }
 
-// String returns the string representation of an IncronEntry suitable for writing to a file
+// String returns the string representation of an eventcronEntry suitable for writing to a file
 func (e *IncronEntry) String() string {
 	maskStr := e.MaskToString()
-	
+
 	// Add options to mask if they differ from defaults
 	var opts []string
 	if !e.Options.NoLoop {
@@ -137,11 +137,11 @@ func (e *IncronEntry) String() string {
 	if e.Options.DotDirs {
 		opts = append(opts, "dotdirs=true")
 	}
-	
+
 	if len(opts) > 0 {
 		maskStr = maskStr + "," + strings.Join(opts, ",")
 	}
-	
+
 	return fmt.Sprintf("%s %s %s", e.Path, maskStr, e.Command)
 }
 
@@ -150,10 +150,10 @@ func (e *IncronEntry) MaskToString() string {
 	if e.Mask == InAllEvents {
 		return "IN_ALL_EVENTS"
 	}
-	
+
 	var parts []string
 	mask := e.Mask
-	
+
 	// Check each flag in order of preference
 	flags := []uint32{
 		InAccess, InModify, InAttrib, InCloseWrite, InCloseNowrite,
@@ -161,7 +161,7 @@ func (e *IncronEntry) MaskToString() string {
 		InDeleteSelf, InMoveSelf, InUnmount, InQOverflow, InIgnored,
 		InOnlydir, InDontFollow, InExclUnlink, InMaskAdd, InIsdir, InOneshot,
 	}
-	
+
 	for _, flag := range flags {
 		if mask&flag != 0 {
 			if name, ok := ReverseEventMaskMap[flag]; ok {
@@ -170,34 +170,34 @@ func (e *IncronEntry) MaskToString() string {
 			}
 		}
 	}
-	
+
 	// If there are remaining bits, add them as numeric
 	if mask != 0 {
 		parts = append(parts, fmt.Sprintf("0x%x", mask))
 	}
-	
+
 	if len(parts) == 0 {
 		return "0"
 	}
-	
+
 	return strings.Join(parts, ",")
 }
 
 // ParseEntry parses a string line into an IncronEntry
 func ParseEntry(line string, lineNumber int) (*IncronEntry, error) {
 	line = strings.TrimSpace(line)
-	
+
 	// Skip empty lines and comments
 	if line == "" || strings.HasPrefix(line, "#") {
 		return nil, nil
 	}
-	
+
 	// Split into at most 3 parts: path, mask, command
 	parts := strings.SplitN(line, " ", 3)
 	if len(parts) < 3 {
 		return nil, fmt.Errorf("line %d: invalid format, expected: <path> <mask> <command>", lineNumber)
 	}
-	
+
 	entry := &IncronEntry{
 		Path:       parts[0],
 		LineNumber: lineNumber,
@@ -207,30 +207,30 @@ func ParseEntry(line string, lineNumber int) (*IncronEntry, error) {
 			DotDirs:   false, // Default: dotdirs=false
 		},
 	}
-	
+
 	// Parse mask and options
 	mask, err := parseMask(parts[1], &entry.Options)
 	if err != nil {
 		return nil, fmt.Errorf("line %d: %v", lineNumber, err)
 	}
 	entry.Mask = mask
-	
+
 	// Command is everything after the second space
 	entry.Command = parts[2]
-	
+
 	return entry, nil
 }
 
 // parseMask parses the mask string and extracts options
 func parseMask(maskStr string, opts *EntryOptions) (uint32, error) {
 	var mask uint32
-	
+
 	// Split by comma to handle options
 	parts := strings.Split(maskStr, ",")
-	
+
 	for _, part := range parts {
 		part = strings.TrimSpace(part)
-		
+
 		// Check if it's an option
 		if strings.Contains(part, "=") {
 			if err := parseOption(part, opts); err != nil {
@@ -238,7 +238,7 @@ func parseMask(maskStr string, opts *EntryOptions) (uint32, error) {
 			}
 			continue
 		}
-		
+
 		// Parse as event mask
 		if eventMask, ok := EventMaskMap[part]; ok {
 			mask |= eventMask
@@ -248,11 +248,11 @@ func parseMask(maskStr string, opts *EntryOptions) (uint32, error) {
 			return 0, fmt.Errorf("unknown event mask: %s", part)
 		}
 	}
-	
+
 	if mask == 0 {
 		return 0, fmt.Errorf("no valid event mask specified")
 	}
-	
+
 	return mask, nil
 }
 
@@ -262,10 +262,10 @@ func parseOption(optStr string, opts *EntryOptions) error {
 	if len(parts) != 2 {
 		return fmt.Errorf("invalid option format: %s", optStr)
 	}
-	
+
 	key := strings.TrimSpace(parts[0])
 	value := strings.TrimSpace(parts[1])
-	
+
 	switch key {
 	case "loopable":
 		if value == "true" {
@@ -294,7 +294,7 @@ func parseOption(optStr string, opts *EntryOptions) error {
 	default:
 		return fmt.Errorf("unknown option: %s", key)
 	}
-	
+
 	return nil
 }
 
@@ -311,31 +311,31 @@ func parseNumericMask(s string) (uint32, error) {
 // ExpandCommand expands wildcards in the command string
 func (e *IncronEntry) ExpandCommand(watchPath, filename string, eventMask uint32) string {
 	cmd := e.Command
-	
+
 	// Replace wildcards
 	cmd = strings.ReplaceAll(cmd, "$$", "$")
 	cmd = strings.ReplaceAll(cmd, "$@", watchPath)
 	cmd = strings.ReplaceAll(cmd, "$#", filename)
 	cmd = strings.ReplaceAll(cmd, "$%", e.eventMaskToText(eventMask))
 	cmd = strings.ReplaceAll(cmd, "$&", fmt.Sprintf("%d", eventMask))
-	
+
 	return cmd
 }
 
 // eventMaskToText converts event mask to human-readable text
 func (e *IncronEntry) eventMaskToText(mask uint32) string {
 	var parts []string
-	
+
 	for flag, name := range ReverseEventMaskMap {
 		if mask&flag != 0 {
 			parts = append(parts, name)
 		}
 	}
-	
+
 	if len(parts) == 0 {
 		return fmt.Sprintf("0x%x", mask)
 	}
-	
+
 	return strings.Join(parts, ",")
 }
 
@@ -348,7 +348,7 @@ func (e *IncronEntry) MatchesPath(path string) bool {
 		matched, _ := regexp.MatchString("^"+pattern+"$", path)
 		return matched
 	}
-	
+
 	return e.Path == path
 }
 

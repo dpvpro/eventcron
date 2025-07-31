@@ -1,4 +1,4 @@
-// Package incron provides inotify watcher functionality
+// Package eventcron provides inotify watcher functionality
 package eventcron
 
 import (
@@ -28,7 +28,7 @@ func (e *InotifyEvent) String() string {
 		e.Path, e.Name, maskToString(e.Mask), e.Cookie, e.WatchDir)
 }
 
-// Watcher manages inotify watches for incron entries
+// Watcher manages inotify watches for eventcron entries
 type Watcher struct {
 	fd          int                    // Inotify file descriptor
 	watches     map[int]*WatchInfo     // Watch descriptor to watch info mapping
@@ -44,7 +44,7 @@ type Watcher struct {
 type WatchInfo struct {
 	Path      string      // Watched path
 	Mask      uint32      // Watch mask
-	Entry     *IncronEntry // Associated incron entry
+	Entry     *IncronEntry // Associated eventcron entry
 	Recursive bool        // Whether to watch recursively
 	DotDirs   bool        // Whether to include dot directories
 }
@@ -110,7 +110,7 @@ func (w *Watcher) Stop() error {
 	return nil
 }
 
-// AddWatch adds a watch for the given incron entry
+// AddWatch adds a watch for the given eventcron entry
 func (w *Watcher) AddWatch(entry *IncronEntry) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()

@@ -1,7 +1,7 @@
-# Example user incron table
+# Example user eventcron table
 # Format: <path> <mask> <command>
 #
-# This file demonstrates various incron table configurations
+# This file demonstrates various eventcron table configurations
 # Copy and modify as needed for your use case
 
 # Basic file monitoring - log when files are created in /tmp
