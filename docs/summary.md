@@ -2,12 +2,12 @@
 
 ## Overview
 
-This is a complete rewrite of the incron-next C++ project in Go, providing a modern, efficient, and maintainable implementation of the inotify cron system.
+This is a complete rewrite of the incron C++ project in Go, providing a modern, efficient, and maintainable implementation of the inotify cron system.
 
 ## What Was Accomplished
 
 ### 1. Complete Go Implementation
-- **Full compatibility** with original incron-next table format and functionality
+- **Full compatibility** with original incron table format and functionality
 - **Modern Go architecture** using goroutines, channels, and proper error handling
 - **Static binary compilation** for easy deployment
 - **Cross-platform build support** via Go's toolchain
@@ -238,6 +238,6 @@ make build-all
 
 ## Conclusion
 
-The eventcrone project successfully provides a modern, efficient, and fully compatible replacement for the original C++ incron-next implementation. With improved performance, better error handling, easier deployment, and comprehensive testing, it represents a significant advancement while maintaining complete backward compatibility.
+The eventcrone project successfully provides a modern, efficient, and fully compatible replacement for the original C++ incron implementation. With improved performance, better error handling, easier deployment, and comprehensive testing, it represents a significant advancement while maintaining complete backward compatibility.
 
 The Go implementation is ready for production use and provides a solid foundation for future enhancements and community contributions.

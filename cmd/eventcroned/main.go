@@ -1,4 +1,4 @@
-// Package main implements the incron daemon (incrond) in Go
+// Package main implements the eventcrone daemon (eventcroned) in Go
 package main
 
 import (
@@ -12,12 +12,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/dpvpro/eventcrone/pkg/incron"
+	"github.com/dpvpro/eventcrone/pkg/eventcrone"
 )
 
 const (
-	defaultConfigFile    = "/etc/incron.conf"
-	defaultPidFile       = "/var/run/incrond.pid"
+	defaultConfigFile    = "/etc/eventcrone.conf"
+	defaultPidFile       = "/var/run/eventcroned.pid"
 	defaultMaxConcurrent = 32
 	defaultTimeout       = 300 // 5 minutes
 )
@@ -33,13 +33,13 @@ type Config struct {
 	SystemTableDir       string
 }
 
-// Daemon represents the incron daemon
+// Daemon represents the eventcrone daemon
 type Daemon struct {
 	config       *Config
-	watcher      *incron.Watcher
-	executor     *incron.CommandExecutor
-	userTables   map[string]*incron.IncronTable
-	systemTables map[string]*incron.IncronTable
+	watcher      *eventcrone.Watcher
+	executor     *eventcrone.CommandExecutor
+	userTables   map[string]*eventcrone.IncronTable
+	systemTables map[string]*eventcrone.IncronTable
 	logger       *log.Logger
 	mu           sync.RWMutex
 	shutdown     chan struct{}
@@ -60,17 +60,17 @@ func main() {
 		fmt.Printf("Usage: %s [options]\n", os.Args[0])
 		fmt.Println("\nOptions:")
 		flag.PrintDefaults()
-		fmt.Println("\nincron daemon (incrond) version", incron.Version)
+		fmt.Println("\neventcrone daemon (eventcroned) version", eventcrone.Version)
 		os.Exit(0)
 	}
 
 	if *version {
-		fmt.Printf("incrond %s\n", incron.Version)
+		fmt.Printf("eventcroned %s\n", eventcrone.Version)
 		os.Exit(0)
 	}
 
 	// Check root privileges
-	if err := incron.CheckRootPrivileges(); err != nil {
+	if err := eventcrone.CheckRootPrivileges(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
@@ -87,7 +87,7 @@ func main() {
 	}
 
 	// Setup directories and permissions
-	if err := incron.SetupPermissions(); err != nil {
+	if err := eventcrone.SetupPermissions(); err != nil {
 		logger.Printf("Failed to setup permissions: %v", err)
 		os.Exit(1)
 	}
@@ -95,8 +95,8 @@ func main() {
 	// Create daemon
 	daemon := &Daemon{
 		config:       config,
-		userTables:   make(map[string]*incron.IncronTable),
-		systemTables: make(map[string]*incron.IncronTable),
+		userTables:   make(map[string]*eventcrone.IncronTable),
+		systemTables: make(map[string]*eventcrone.IncronTable),
 		logger:       logger,
 		shutdown:     make(chan struct{}),
 		done:         make(chan struct{}),
@@ -127,13 +127,13 @@ func main() {
 	go daemon.handleSignals()
 
 	// Start daemon
-	logger.Printf("incrond %s starting up", incron.Version)
+	logger.Printf("eventcroned %s starting up", eventcrone.Version)
 	if err := daemon.Run(); err != nil {
 		logger.Printf("Daemon error: %v", err)
 		os.Exit(1)
 	}
 
-	logger.Printf("incrond %s shutting down", incron.Version)
+	logger.Printf("eventcroned %s shutting down", eventcrone.Version)
 }
 
 // loadConfig loads configuration from file or returns defaults
@@ -143,8 +143,8 @@ func loadConfig(configFile string) *Config {
 		CommandTimeout:        time.Duration(defaultTimeout) * time.Second,
 		LogToSyslog:          true,
 		LogLevel:             "info",
-		UserTableDir:         incron.DefaultUserTableDir,
-		SystemTableDir:       incron.DefaultSystemTableDir,
+		UserTableDir:         eventcrone.DefaultUserTableDir,
+		SystemTableDir:       eventcrone.DefaultSystemTableDir,
 	}
 
 	// TODO: Implement actual config file parsing
@@ -155,13 +155,13 @@ func loadConfig(configFile string) *Config {
 // setupLogging sets up logging to syslog or stderr
 func setupLogging(useSyslog bool) (*log.Logger, error) {
 	if useSyslog {
-		syslogWriter, err := syslog.New(syslog.LOG_DAEMON|syslog.LOG_INFO, "incrond")
+		syslogWriter, err := syslog.New(syslog.LOG_DAEMON|syslog.LOG_INFO, "eventcroned")
 		if err != nil {
 			return nil, fmt.Errorf("failed to connect to syslog: %v", err)
 		}
 		return log.New(syslogWriter, "", 0), nil
 	}
-	return log.New(os.Stderr, "incrond: ", log.LstdFlags), nil
+	return log.New(os.Stderr, "eventcroned: ", log.LstdFlags), nil
 }
 
 // daemonize turns the process into a daemon
@@ -222,14 +222,14 @@ func removePidFile(pidFile string) {
 // Initialize initializes the daemon
 func (d *Daemon) Initialize() error {
 	// Create inotify watcher
-	watcher, err := incron.NewWatcher()
+	watcher, err := eventcrone.NewWatcher()
 	if err != nil {
 		return fmt.Errorf("failed to create watcher: %v", err)
 	}
 	d.watcher = watcher
 
 	// Create command executor
-	d.executor = incron.NewCommandExecutor(
+	d.executor = eventcrone.NewCommandExecutor(
 		d.config.MaxConcurrentCommands,
 		d.config.CommandTimeout,
 	)
@@ -253,11 +253,11 @@ func (d *Daemon) LoadTables() error {
 	defer d.mu.Unlock()
 
 	// Clear existing tables
-	d.userTables = make(map[string]*incron.IncronTable)
-	d.systemTables = make(map[string]*incron.IncronTable)
+	d.userTables = make(map[string]*eventcrone.IncronTable)
+	d.systemTables = make(map[string]*eventcrone.IncronTable)
 
 	// Load user tables
-	userTables, err := incron.LoadAllUserTables()
+	userTables, err := eventcrone.LoadAllUserTables()
 	if err != nil {
 		d.logger.Printf("Warning: failed to load user tables: %v", err)
 	} else {
@@ -265,7 +265,7 @@ func (d *Daemon) LoadTables() error {
 	}
 
 	// Load system tables
-	systemTables, err := incron.LoadAllSystemTables()
+	systemTables, err := eventcrone.LoadAllSystemTables()
 	if err != nil {
 		d.logger.Printf("Warning: failed to load system tables: %v", err)
 	} else {
@@ -323,7 +323,7 @@ func (d *Daemon) Run() error {
 }
 
 // handleEvent processes an inotify event
-func (d *Daemon) handleEvent(event *incron.InotifyEvent) {
+func (d *Daemon) handleEvent(event *eventcrone.InotifyEvent) {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 
@@ -332,13 +332,13 @@ func (d *Daemon) handleEvent(event *incron.InotifyEvent) {
 		for _, entry := range table.Entries {
 			if d.eventMatches(&entry, event) {
 				// Check user permissions
-				allowed, err := incron.CheckUserPermission(username)
+				allowed, err := eventcrone.CheckUserPermission(username)
 				if err != nil {
 					d.logger.Printf("Error checking permissions for user %s: %v", username, err)
 					continue
 				}
 				if !allowed {
-					d.logger.Printf("User %s not allowed to use incron", username)
+					d.logger.Printf("User %s not allowed to use eventcrone", username)
 					continue
 				}
 
@@ -359,8 +359,8 @@ func (d *Daemon) handleEvent(event *incron.InotifyEvent) {
 	}
 }
 
-// eventMatches checks if an event matches an incron entry
-func (d *Daemon) eventMatches(entry *incron.IncronEntry, event *incron.InotifyEvent) bool {
+// eventMatches checks if an event matches an eventcrone entry
+func (d *Daemon) eventMatches(entry *eventcrone.IncronEntry, event *eventcrone.InotifyEvent) bool {
 	// Check if the path matches
 	if !entry.MatchesPath(event.WatchDir) && !entry.MatchesPath(event.Path) {
 		return false
@@ -374,8 +374,8 @@ func (d *Daemon) eventMatches(entry *incron.IncronEntry, event *incron.InotifyEv
 	return true
 }
 
-// executeCommand executes a command for an incron entry
-func (d *Daemon) executeCommand(entry *incron.IncronEntry, event *incron.InotifyEvent, username string) {
+// executeCommand executes a command for an eventcrone entry
+func (d *Daemon) executeCommand(entry *eventcrone.IncronEntry, event *eventcrone.InotifyEvent, username string) {
 	result, err := d.executor.Execute(entry, event, username)
 	if err != nil {
 		d.logger.Printf("Failed to execute command for user %s: %v", username, err)

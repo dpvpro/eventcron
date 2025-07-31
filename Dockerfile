@@ -30,44 +30,44 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 
 # Create necessary directories
-RUN mkdir -p /var/spool/incron \
-    && mkdir -p /etc/incron.d \
+RUN mkdir -p /var/spool/eventcrone \
+    && mkdir -p /etc/eventcrone.d \
     && mkdir -p /var/run
 
-# Create incron user and group
-RUN addgroup -g 1000 incron \
-    && adduser -D -u 1000 -G incron incron
+# Create eventcrone user and group
+RUN addgroup -g 1000 eventcrone \
+    && adduser -D -u 1000 -G eventcrone eventcrone
 
 # Copy binaries from builder
-COPY --from=builder /src/incrond /usr/sbin/incrond
-COPY --from=builder /src/incrontab /usr/bin/incrontab
+COPY --from=builder /src/eventcroned /usr/sbin/eventcroned
+COPY --from=builder /src/eventcronetab /usr/bin/eventcronetab
 
 # Set proper permissions
-RUN chmod 755 /usr/sbin/incrond \
-    && chmod 4755 /usr/bin/incrontab \
-    && chown root:root /usr/sbin/incrond /usr/bin/incrontab
+RUN chmod 755 /usr/sbin/eventcroned \
+    && chmod 4755 /usr/bin/eventcronetab \
+    && chown root:root /usr/sbin/eventcroned /usr/bin/eventcronetab
 
 # Set proper directory permissions
-RUN chown root:root /var/spool/incron \
-    && chmod 755 /var/spool/incron \
-    && chown root:root /etc/incron.d \
-    && chmod 755 /etc/incron.d
+RUN chown root:root /var/spool/eventcrone \
+    && chmod 755 /var/spool/eventcrone \
+    && chown root:root /etc/eventcrone.d \
+    && chmod 755 /etc/eventcrone.d
 
 # Create default config file
-RUN echo "# eventcrone configuration file" > /etc/incron.conf \
-    && echo "# This file is currently unused but reserved for future configuration options" >> /etc/incron.conf
+RUN echo "# eventcrone configuration file" > /etc/eventcrone.conf \
+    && echo "# This file is currently unused but reserved for future configuration options" >> /etc/eventcrone.conf
 
 # Create volume mount points
-VOLUME ["/var/spool/incron", "/etc/incron.d", "/watch"]
+VOLUME ["/var/spool/eventcrone", "/etc/eventcrone.d", "/watch"]
 
 # Expose no ports (local file system monitoring)
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD pgrep incrond > /dev/null || exit 1
+    CMD pgrep eventcroned > /dev/null || exit 1
 
 # Default command - run daemon in foreground
-CMD ["/usr/sbin/incrond", "-n"]
+CMD ["/usr/sbin/eventcroned", "-n"]
 
 # Metadata
 LABEL maintainer="eventcrone project" \
@@ -75,5 +75,5 @@ LABEL maintainer="eventcrone project" \
       version="1.0.0" \
       org.opencontainers.image.title="eventcrone" \
       org.opencontainers.image.description="Modern Go implementation of inotify cron system" \
-      org.opencontainers.image.source="https://github.com/dpvpro/incron-next" \
+      org.opencontainers.image.source="https://github.com/dpvpro/eventcrone" \
       org.opencontainers.image.licenses="GPL-3.0"

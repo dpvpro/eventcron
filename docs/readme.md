@@ -1,10 +1,10 @@
 # eventcrone
 
-A modern Go implementation of the inotify cron system (incron-next).
+A modern Go implementation of the inotify cron system (incron).
 
 ## Overview
 
-eventcrone is a complete rewrite of the original incron-next C++ project in Go. It provides a daemon (`incrond`) that monitors filesystem events using Linux inotify and executes commands when specified events occur, plus a table management utility (`incrontab`) similar to crontab.
+eventcrone is a complete rewrite of the original incron C++ project in Go. It provides a daemon (`eventcroned`) that monitors filesystem events using Linux inotify and executes commands when specified events occur, plus a table management utility (`eventcronetab`) similar to crontab.
 
 Unlike traditional cron which runs commands based on time, incron runs commands based on filesystem events like file creation, modification, or deletion.
 
@@ -26,8 +26,8 @@ Unlike traditional cron which runs commands based on time, incron runs commands 
 
 ```bash
 # Clone the repository
-git clone https://github.com/dpvpro/incron-next.git
-cd incron-next/eventcrone
+git clone https://github.com/dpvpro/eventcrone.git
+cd eventcrone
 
 # Build the project
 make build

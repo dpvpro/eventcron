@@ -1,5 +1,5 @@
-// Package incron provides core types and functionality for the Go implementation of incron-next
-package incron
+// Package incron provides core types and functionality for the Go implementation of eventcrone
+package eventcrone
 
 import (
 	"fmt"

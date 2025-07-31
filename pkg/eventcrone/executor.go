@@ -1,5 +1,5 @@
 // Package incron provides command execution functionality
-package incron
+package eventcrone
 
 import (
 	"context"

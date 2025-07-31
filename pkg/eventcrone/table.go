@@ -1,5 +1,5 @@
 // Package incron provides table loading and management functionality
-package incron
+package eventcrone
 
 import (
 	"bufio"
