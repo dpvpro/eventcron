@@ -14,7 +14,7 @@ This is a complete rewrite of the incron C++ project in Go, providing a modern, 
 
 ### 2. Core Components Implemented
 
-#### Daemon (`incrond`)
+#### Daemon (`eventcroned`)
 - **Event-driven architecture** using inotify for filesystem monitoring
 - **Concurrent command execution** with configurable limits
 - **Signal handling** (SIGHUP for reload, SIGTERM for graceful shutdown)
@@ -22,7 +22,7 @@ This is a complete rewrite of the incron C++ project in Go, providing a modern, 
 - **Recursive directory watching** with configurable options
 - **Loop prevention** to avoid infinite event cycles
 
-#### Client (`incrontab`)
+#### Client (`eventcronetab`)
 - **Table management** compatible with original crontab-style interface
 - **Interactive editing** with validation and error reporting
 - **User permission checking** via allow/deny files
@@ -51,9 +51,9 @@ This is a complete rewrite of the incron C++ project in Go, providing a modern, 
 - **Process cleanup** and signal handling
 
 #### Configuration
-- **System tables** in `/etc/incron.d/` for root-level automation
-- **User tables** in `/var/spool/incron/` for per-user configuration
-- **Permission files** `/etc/incron.allow` and `/etc/incron.deny`
+- **System tables** in `/etc/eventcrone.d/` for root-level automation
+- **User tables** in `/var/spool/eventcrone/` for per-user configuration
+- **Permission files** `/etc/eventcrone.allow` and `/etc/eventcrone.deny`
 - **Table validation** with detailed error messages
 
 ### 4. Build and Deployment
@@ -102,9 +102,9 @@ This is a complete rewrite of the incron C++ project in Go, providing a modern, 
 ```
 eventcrone/
 ├── cmd/
-│   ├── incrond/          # Daemon executable
-│   └── incrontab/        # Client executable
-├── pkg/incron/           # Core library
+│   ├── eventcroned/          # Daemon executable
+│   └── eventcronetab/        # Client executable
+├── pkg/eventcrone/           # Core library
 │   ├── types.go          # Core types and parsing
 │   ├── table.go          # Table management
 │   ├── permissions.go    # User permission handling
@@ -125,10 +125,10 @@ eventcrone/
 ### Basic File Monitoring
 ```bash
 # Monitor /tmp for new files
-echo '/tmp IN_CREATE logger "New file: $#"' | incrontab
+echo '/tmp IN_CREATE logger "New file: $#"' | eventcronetab
 
 # Monitor configuration changes
-echo '/etc/nginx/nginx.conf IN_MODIFY systemctl reload nginx' | incrontab
+echo '/etc/nginx/nginx.conf IN_MODIFY systemctl reload nginx' | eventcronetab
 ```
 
 ### Advanced Scenarios
@@ -150,7 +150,7 @@ echo '/etc/nginx/nginx.conf IN_MODIFY systemctl reload nginx' | incrontab
 - **Wildcards**: All `$@`, `$#`, `$%`, `$&`, `$$` expansions work identically
 - **Event masks**: All inotify events supported with same names
 - **Options**: `recursive`, `loopable`, `dotdirs` work as expected
-- **Permissions**: `incron.allow` and `incron.deny` files work identically
+- **Permissions**: `eventcrone.allow` and `eventcrone.deny` files work identically
 - **Signals**: SIGHUP reload and SIGTERM shutdown work the same
 
 ### Enhanced Features
@@ -178,7 +178,7 @@ echo '/etc/nginx/nginx.conf IN_MODIFY systemctl reload nginx' | incrontab
 
 ### Process Security
 - **Privilege separation**: Commands run with user credentials
-- **SUID handling**: Proper SUID bit management for incrontab
+- **SUID handling**: Proper SUID bit management for eventcronetab
 - **Permission validation**: Comprehensive user permission checking
 - **Resource limits**: Configurable limits prevent resource exhaustion
 
@@ -212,10 +212,10 @@ make build
 sudo make install
 
 # Start daemon
-sudo systemctl start incrond
+sudo systemctl start eventcroned
 
 # Add a watch
-echo '/tmp IN_CREATE echo "File created: $#"' | incrontab
+echo '/tmp IN_CREATE echo "File created: $#"' | eventcronetab
 
 # Test it
 touch /tmp/testfile
