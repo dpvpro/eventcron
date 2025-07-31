@@ -199,7 +199,7 @@ install-systemd:
 	@echo "Type=forking" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
 	@echo "ExecStart=$(BINDIR)/$(DAEMON)" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
 	@echo "ExecReload=/bin/kill -HUP \$$MAINPID" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
-	@echo "PIDFile=/run/eventcrond.pid" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
+	@echo "PIDFile=/tmp/eventcrond.pid" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
 	@echo "Restart=on-failure" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
 	@echo "" >> $(DESTDIR)/etc/systemd/system/eventcrond.service
 	@echo "[Install]" >> $(DESTDIR)/etc/systemd/system/eventcrond.service

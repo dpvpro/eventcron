@@ -19,8 +19,8 @@
 #log_level = info
 
 # PID file location
-# Default: /var/run/eventcrond.pid
-#pid_file = /var/run/eventcrond.pid
+# Default: /tmp/eventcrond.pid
+#pid_file = /tmp/eventcrond.pid
 
 # User table directory
 # Default: /var/spool/eventcron
